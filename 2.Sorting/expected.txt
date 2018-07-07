@@ -2,6 +2,7 @@ yes
 swap 1 2
 no
 yes
-reverse 2 5
 yes
-no
+swap 2 3
+yes
+swap 2 3
