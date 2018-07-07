@@ -11,3 +11,11 @@ swap 2 4
 yes
 swap 1 3
 no
+yes
+swap 1 2
+no
+yes
+swap 2 4
+yes
+swap 1 6
+no
