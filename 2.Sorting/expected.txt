@@ -1,0 +1,5 @@
+yes
+swap 1 2
+no
+yes
+reverse 2 5
