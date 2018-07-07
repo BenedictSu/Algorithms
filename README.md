@@ -17,3 +17,11 @@ Language: c++
 To run the code, execute Algorithms/2.Sorting/execute.sh (you will need to have g++ available)
 It will execute the algorithm using Algorithms/2.Sorting/input.txt and compare the generated output.txt against Algorithms/2.Sorting/expected.txt
 Add more inputs by appending them (spaces/newline separated) to the end of Algorithms/2.Sorting/input.txt, and append the respective expected results (newline separated between answers) to the end of Algorithms/2.Sorting/expected.txt
+
+3. Matrix Rotation
+Completed: 8 July 2018 03.21h
+Duration: 3 hours
+Language: c++
+To run the code, execute Algorithms/3.MatrixRotation/execute.sh (you will need to have g++ available)
+It will execute the algorithm using Algorithms/3.MatrixRotation/input.txt and compare the generated output.txt against Algorithms/3.MatrixRotation/expected.txt
+Add more inputs by appending them (spaces/newline separated) to the end of Algorithms/3.MatrixRotation/input.txt, and append the respective expected results (newline separated between answers) to the end of Algorithms/3.MatrixRotation/expected.txt
