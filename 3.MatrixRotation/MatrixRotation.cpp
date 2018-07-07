@@ -8,23 +8,24 @@ int row, col, rotation;
 int inputs[MAX_N][MAX_N];
 int outputs[MAX_N][MAX_N];
 
-int determineOutput(int standardiseRotation, int numElements, int x1, int x2, int y1, int y2) {
+void setOutput(int output, int standardisedRotation, int numElements, int x1, int x2, int y1, int y2) {
     // remove complete circles to consider only how much to rotate within 1 circle
-    int innerRotation = standardiseRotation % numElements;
-    int numRow = x2 - x1;
-    int numCol = y2 - y1;
+    int innerRotation = standardisedRotation % numElements;
+    
+    int numCol = x2 - x1;
+    int numRow = y2 - y1;
     if (innerRotation <= numRow) {
         // go down left most col
-        return inputs[x1][y1 + innerRotation];
+        outputs[y1 + innerRotation][x1] = output;
     } else if (innerRotation <= numRow + numCol) {
         // go right on bottow most row
-        return inputs[x1 + innerRotation - numRow][y2];
+        outputs[y2][x1 + innerRotation - numRow] = output;
     } else if (innerRotation <= 2 * numRow + numCol) {
         // go up right most col
-        return inputs[x2][y2 - (innerRotation - numRow - numCol)];
+        outputs[y2 - (innerRotation - numRow - numCol)][x2] = output;
     } else {
         // go left on bottow most row
-        return inputs[x2 - (innerRotation - 2 * numRow - numCol)][y1];
+        outputs[y1][x2 - (innerRotation - 2 * numRow - numCol)] = output;
     }
 }
 
@@ -42,25 +43,25 @@ void rotateMatrix() {
         // top and bottom rows
         for (int x_coor = x1; x_coor <= x2; x_coor++) {
             // standardise the coordinate to x1, y1 by adding to rotation required
-            int standardiseRotation = rotation + (numElements - (x_coor - x1));
+            int standardisedRotation = rotation + (numElements - (x_coor - x1));
             // top row
-            outputs[x_coor][y1] = determineOutput(standardiseRotation, numElements, x1, x2, y1, y2);
+            setOutput(inputs[y1][x_coor], standardisedRotation, numElements, x1, x2, y1, y2);
 
             // bottom row
-            standardiseRotation = rotation + (numElements + (y2 - y1) + (x_coor - x1));
-            outputs[x_coor][y2] = determineOutput(standardiseRotation, numElements, x1, x2, y1, y2);
+            standardisedRotation = rotation + (numElements + (y2 - y1) + (x_coor - x1));
+            setOutput(inputs[y2][x_coor], standardisedRotation, numElements, x1, x2, y1, y2);
         }
 
         // left and right col, skip first and last elements calculated
         for (int y_coor = y1 + 1; y_coor < y2; y_coor++) {
             // standardise the coordinate to x1, y1 by adding to rotation required
-            int standardiseRotation = rotation + (y_coor - y1);
+            int standardisedRotation = rotation + (y_coor - y1);
             // left col
-            outputs[x1][y_coor] = determineOutput(standardiseRotation, numElements, x1, x2, y1, y2);
+            setOutput(inputs[y_coor][x1], standardisedRotation, numElements, x1, x2, y1, y2);
 
             // right col
-            standardiseRotation = rotation + (numElements - (x2 - x1) - (y_coor - y1));
-            outputs[x2][y_coor] = determineOutput(standardiseRotation, numElements, x1, x2, y1, y2);
+            standardisedRotation = rotation + (numElements - (x2 - x1) - (y_coor - y1));
+            setOutput(inputs[y_coor][x2], standardisedRotation, numElements, x1, x2, y1, y2);
         }
     }
 }
