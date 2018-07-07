@@ -5,93 +5,162 @@ using namespace std;
 #define MAX_N 100001
 
 int inputSize, inputs[MAX_N];
-// variables for swapCheck
-int swapCount, leftSwap, rightSwap;
 
-void swap() {
-    int swapHolder = inputs[rightSwap];
-    inputs[rightSwap] = inputs[leftSwap];
-    inputs[leftSwap] = swapHolder;
-    swapCount++;
+// temp data
+string execution;
+int executionCount, leftIndex, rightIndex;
+
+void resetTempData() {
+    execution = "swap";
+    executionCount = 0, leftIndex = -1, rightIndex = -1;
 }
 
-void postSwapCheck() {
-    // check that the swap result in a valid ascending order
-    if (inputs[rightSwap] < inputs[rightSwap - 1]) {
-        // can no longer have ascending order with this swap
-        swapCount++;
-    } else if (inputs[leftSwap] > inputs[leftSwap + 1]) {
-        // can no longer have ascending order with this swap
-        swapCount++;
-    } else if (1 != leftSwap && inputs[leftSwap] < inputs[leftSwap - 1]) {
-        // can no longer have ascending order with this swap
-        swapCount++;
+void simulateExecution() {
+    int tempHolder = inputs[rightIndex];
+    inputs[rightIndex] = inputs[leftIndex];
+    inputs[leftIndex] = tempHolder;
+    executionCount++;
+}
+
+void postSimulatedExecutionCheck(bool isSwap) {
+    // check that the simulated execution result in a valid ascending order
+
+    if (1 != leftIndex && inputs[leftIndex] < inputs[leftIndex - 1]) {
+        // can no longer have ascending order with this simulated execution
+        executionCount++;
+    }
+
+    if (isSwap) {
+        // for swap, need to check the item before rightIndex
+        // and the item after leftIndex
+        if (inputs[rightIndex] < inputs[rightIndex - 1]) {
+            // can no longer have ascending order with this simulated execution
+            executionCount++;
+        } else if (inputs[leftIndex] > inputs[leftIndex + 1]) {
+            // can no longer have ascending order with this simulated execution
+            executionCount++;
+        }
     }
 }
 
 void swapCheck() {
     for (int i = 2; i <= inputSize; i++) {
-        // only check for swap if there was less than 2 swaps done
-        if (swapCount < 2) {
+        if (executionCount < 2) {
+            // only check for swap if there were less than 2 swaps done
             if (inputs[i] < inputs[i - 1]) {
-                // this input is smaller than the previous input
-                if (0 == swapCount) {
-                    if (-1 == leftSwap) {
+                // this input is smaller than the previous input, need swap
+                if (0 == executionCount) {
+                    if (-1 == leftIndex) {
                         // set the swap in as pending
-                        leftSwap = i - 1;
-                        rightSwap = i;
+                        leftIndex = i - 1;
+                        rightIndex = i;
                     } else {
-                        rightSwap = i;
+                        rightIndex = i;
                         // commit the swap
-                        swap();
-                        postSwapCheck();
+                        simulateExecution();
+                        postSimulatedExecutionCheck(true);
                     }
                 } else {
-                    // already have 1 swap done
-                    swapCount++;
+                    // already have 1 swap done, cannot swap again
+                    executionCount++;
                 }
             }
+        } else {
+            break;
+        }
+    }
+}
+
+void reverseCheck() {
+    for (int i = 2; i <= inputSize; i++) {
+        if (executionCount < 2) {
+            // only check for reverse if there were less than 2 reverses done
+            if (inputs[i] < inputs[i - 1]) {
+                // this input is smaller than the previous input, need reverse
+                if (0 == executionCount) {
+                    if (-1 == leftIndex) {
+                        // set the reverse in as pending
+                        leftIndex = i - 1;
+                        rightIndex = i;
+                    } 
+                } else if (1 == executionCount) {
+                    // already have 1 reverse done, cannot reverse again
+                    executionCount++;
+                }
+            } else {
+                if (0 == executionCount && -1 != leftIndex) {
+                    rightIndex = i - 1;
+                    // commit the reverse
+                    simulateExecution();
+                    postSimulatedExecutionCheck(false);
+                    // Extra check for right side
+                    if (inputs[rightIndex] > inputs[rightIndex + 1]) {
+                        // can no longer have ascending order with this reverse
+                        executionCount++;
+                    }
+                }
+            }
+        } else {
+            break;
+        }
+    }
+}
+
+void postSimulationCheck(bool isSwap) {
+    if (0 == executionCount && -1 != leftIndex) {
+        // commit the pending simulated execution
+        simulateExecution();
+        postSimulatedExecutionCheck(isSwap);
+        // Extra check for right side
+        if (inputSize != rightIndex && inputs[rightIndex] > inputs[rightIndex + 1]) {
+            // can no longer have ascending order with this simulateExecution
+            executionCount++;
         }
     }
 }
 
 int main() {
     while (EOF != scanf("%d", &inputSize)) {
-        
-        int isSorted = 1;
-        // reset variables
-        swapCount = 0, leftSwap = -1;
-
         // read in all the inputs into inputs array
-        scanf("%d", &inputs[1]);
-        for (int i = 2; i <= inputSize; i++) {
+        for (int i = 1; i <= inputSize; i++) {
             scanf("%d", &inputs[i]);
         }
 
         // do a swap check
+        resetTempData();
         swapCheck();
-        if (0 == swapCount && -1 != leftSwap) {
-            // commit the pending swap
-            swap();
-            postSwapCheck();
-            // Extra check for right side
-            if (inputSize != rightSwap && inputs[rightSwap] > inputs[rightSwap + 1]) {
-                // can no longer have ascending order with this swap
-                swapCount++;
-            }
-        }
-        if (swapCount > 1) {
+        postSimulationCheck(true);
+
+        if (executionCount > 1) {
             // undo the swap for the reverse check
-            int swapHolder = inputs[rightSwap];
-            inputs[rightSwap] = inputs[leftSwap];
-            inputs[leftSwap] = swapHolder;
+            int tempHolder = inputs[rightIndex];
+            inputs[rightIndex] = inputs[leftIndex];
+            inputs[leftIndex] = tempHolder;
         }
 
-        if (0 == swapCount) {
+        // do a reverse check if not already ordered or cannot order with 1 swap
+        if (executionCount > 1) {
+            resetTempData();
+            reverseCheck();
+
+            if (rightIndex == leftIndex + 1) {
+                // the inputs after the rightIndex was determined were descending,
+                // set the last input as the rightIndex
+                rightIndex = inputSize;
+            }
+
+            postSimulationCheck(false);
+            if (1 == executionCount) {
+                // a reverse was successful
+                execution = "reverse";
+            }
+        }
+
+        if (0 == executionCount) {
             printf("yes\n");
-        } else if (1 == swapCount) {
+        } else if (1 == executionCount) {
             printf("yes\n");
-            printf("swap %d %d\n", leftSwap, rightSwap);
+            printf("%s %d %d\n", execution.c_str(), leftIndex, rightIndex);
         } else {
             printf("no\n");
         }

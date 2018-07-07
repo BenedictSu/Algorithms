@@ -19,3 +19,13 @@ swap 2 4
 yes
 swap 1 6
 no
+yes
+reverse 2 5
+no
+no
+yes
+reverse 1 4
+yes
+swap 5 6
+yes
+reverse 2 5
